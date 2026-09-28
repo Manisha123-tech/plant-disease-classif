@@ -1,0 +1,28 @@
+PLANT DISEASE CLASSIFIER: MODEL COMPARISON
+======================================================================
+Test images: 851
+
+Model: SVM
+Accuracy: 0.9483
+Weighted precision: 0.9478
+Weighted recall: 0.9483
+Weighted F1: 0.9476
+----------------------------------------------------------------------
+Model: Random Forest
+Accuracy: 0.9530
+Weighted precision: 0.9527
+Weighted recall: 0.9530
+Weighted F1: 0.9527
+----------------------------------------------------------------------
+Model: MobileNetV2 Baseline
+Accuracy: 0.9741
+Weighted precision: 0.9743
+Weighted recall: 0.9741
+Weighted F1: 0.9741
+----------------------------------------------------------------------
+Model: MobileNetV2 + CBAM + Focal Loss
+Accuracy: 0.9565
+Weighted precision: 0.9560
+Weighted recall: 0.9565
+Weighted F1: 0.9557
+----------------------------------------------------------------------

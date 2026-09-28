@@ -1,0 +1,32 @@
+{
+  "svm_parameters": {
+    "C": 10,
+    "gamma": "scale",
+    "kernel": "rbf"
+  },
+  "random_forest_parameters": {
+    "n_estimators": 100,
+    "max_depth": 30,
+    "min_samples_leaf": 2,
+    "class_weight": "balanced"
+  },
+  "results": [
+    {
+      "model": "SVM",
+      "accuracy": 0.9482961222091657,
+      "precision_weighted": 0.9478116602996725,
+      "recall_weighted": 0.9482961222091657,
+      "f1_weighted": 0.9476394575535444,
+      "classification_report": "                       precision    recall  f1-score   support\n\nPotato___Early_blight       0.97      1.00      0.98       150\n     Potato___healthy       1.00      0.92      0.96        24\n  Tomato_Early_blight       0.91      0.83      0.87       150\n   Tomato_Late_blight       0.93      0.95      0.94       287\n       Tomato_healthy       0.98      0.99      0.99       240\n\n             accuracy                           0.95       851\n            macro avg       0.96      0.94      0.95       851\n         weighted avg       0.95      0.95      0.95       851\n"
+    },
+    {
+      "model": "Random Forest",
+      "accuracy": 0.9529964747356052,
+      "precision_weighted": 0.9527229351827096,
+      "recall_weighted": 0.9529964747356052,
+      "f1_weighted": 0.952714510856815,
+      "classification_report": "                       precision    recall  f1-score   support\n\nPotato___Early_blight       0.95      0.99      0.97       150\n     Potato___healthy       0.96      0.96      0.96        24\n  Tomato_Early_blight       0.90      0.89      0.90       150\n   Tomato_Late_blight       0.95      0.93      0.94       287\n       Tomato_healthy       0.99      1.00      1.00       240\n\n             accuracy                           0.95       851\n            macro avg       0.95      0.95      0.95       851\n         weighted avg       0.95      0.95      0.95       851\n"
+    }
+  ],
+  "runtime_seconds": 61.90442395210266
+}

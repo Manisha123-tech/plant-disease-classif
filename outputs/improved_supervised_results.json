@@ -1,0 +1,14 @@
+{
+    "approach": "Improved Supervised Learning",
+    "architecture": [
+        "Input: 8 features",
+        "Dense: 64 neurons",
+        "Dense: 32 neurons",
+        "Output: 5 classes"
+    ],
+    "accuracy": 0.782608695652174,
+    "precision": 0.7792681257722385,
+    "recall": 0.782608695652174,
+    "f1_score": 0.7793191288508186,
+    "epochs_trained": 30
+}

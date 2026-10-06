@@ -1,47 +1,83 @@
-# Plant Disease Classifier — Final Report
+# Plant Disease Classification — Final Report
 
-## Problem and Objective
-Classify tomato and potato leaf images into five classes: Tomato healthy, Tomato Early blight, Tomato Late blight, Potato healthy, and Potato Early blight.
+## 1. Problem and Objective
 
-## Dataset
-The prepared dataset contains 3,955 training images, 846 validation images, and 851 test images. The classes are imbalanced, particularly Potato healthy.
+The objective of this project is to classify plant leaf images into five classes:
 
-## Methods
-1. HOG features and HSV color histograms with SVM and Random Forest.
-2. MobileNetV2 transfer learning baseline.
-3. MobileNetV2 with CBAM attention and Focal Loss.
+1. Tomato Healthy
+2. Tomato Early Blight
+3. Tomato Late Blight
+4. Potato Healthy
+5. Potato Early Blight
 
-## Results
-| Model | Test accuracy |
-|---|---:|
-| SVM | 94.83% |
-| Random Forest | 95.30% |
-| MobileNetV2 baseline | 97.41% |
-| MobileNetV2 + CBAM + Focal Loss | 95.65% |
+The project implements two AI approaches aligned with the Artificial Intelligence syllabus:
 
-The baseline achieved the highest test accuracy. The CBAM + Focal Loss variant scored 1.76 percentage points lower, so it did not improve aggregate accuracy in this experiment. This is an experimental finding, not a failure of the project.
+1. Supervised Learning
+2. Knowledge-Based Reasoning
 
-## Application
-The Streamlit demo accepts leaf images and displays a predicted class, confidence, and top three predictions. One image from each class was tested successfully. This functional check does not replace the full test-set evaluation.
+A working Streamlit application was also developed for image-based prediction.
 
-## Limitations and Future Work
-The dataset is imbalanced and may not represent real field conditions. Future work could include more balanced data and independent field-image testing.
+---
 
-## Demo Testing Results
+## 2. Dataset
 
-Five sample images, one from each class, were tested using the Streamlit application.
+The prepared dataset contains:
 
-| Actual class | Predicted class | Result |
-|---|---|---|
-| Tomato healthy | Tomato healthy | Correct |
-| Tomato Early blight | Tomato Late blight | Incorrect |
-| Tomato Late blight | Tomato Late blight | Correct |
-| Potato healthy | Potato healthy | Correct |
-| Potato Early blight | Potato Early blight | Correct |
+- Training images: 3,955
+- Validation images: 846
+- Test images: 851
+- Total images: 5,652
+- Number of classes: 5
 
-Demo accuracy: 4/5 (80%).
+The dataset is imbalanced. In particular, the Potato Healthy class contains substantially fewer images than some of the other classes.
 
-The Tomato Early blight image was misclassified as Tomato Late blight. This small sample test is separate from the full test-set evaluation.
+### Class Distribution
 
-## Conclusion
-The project implements and compares traditional machine learning and deep learning approaches and provides a working image-classification demo. All results are reported from the completed experiments.
+| Class | Train | Validation | Test |
+|---|---:|---:|---:|
+| Tomato Healthy | 1,113 | 238 | 240 |
+| Tomato Early Blight | 700 | 150 | 150 |
+| Tomato Late Blight | 1,336 | 286 | 287 |
+| Potato Healthy | 106 | 22 | 24 |
+| Potato Early Blight | 700 | 150 | 150 |
+| **Total** | **3,955** | **846** | **851** |
+
+---
+
+## 3. Feature Representation
+
+Instead of directly using the complete image as input, eight simple measurable image features were extracted.
+
+The features are:
+
+- Mean Red value
+- Mean Green value
+- Mean Blue value
+- Mean brightness
+- Brightness texture (standard deviation)
+- Red ratio
+- Green ratio
+- Blue ratio
+
+Images are resized to 128 × 128 pixels before feature extraction.
+
+The feature values are standardized using statistics calculated from the training set.
+
+The same preprocessing is applied to the validation set, test set, and demo images.
+
+---
+
+# 4. AI Approach 1 — Supervised Learning
+
+A feed-forward neural network (MLP) was implemented as the supervised learning approach.
+
+### Architecture
+
+```text
+8 input features
+       ↓
+Dense Layer — 32 neurons
+       ↓
+Dense Layer — 16 neurons
+       ↓
+Output Layer — 5 classes

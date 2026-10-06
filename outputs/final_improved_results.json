@@ -1,0 +1,15 @@
+{
+    "approach": "Improved Supervised Learning",
+    "improvement": "Class-balanced training using class weights",
+    "accuracy": 0.7285546415981199,
+    "precision": 0.7806894154257448,
+    "recall": 0.7285546415981199,
+    "f1_score": 0.737247896571301,
+    "class_weights": {
+        "0": 0.710691823899371,
+        "1": 1.13,
+        "2": 0.5920658682634731,
+        "3": 7.462264150943396,
+        "4": 1.13
+    }
+}

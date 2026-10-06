@@ -28,5 +28,5 @@
       "classification_report": "                       precision    recall  f1-score   support\n\nPotato___Early_blight       0.95      0.99      0.97       150\n     Potato___healthy       0.96      0.96      0.96        24\n  Tomato_Early_blight       0.90      0.89      0.90       150\n   Tomato_Late_blight       0.95      0.93      0.94       287\n       Tomato_healthy       0.99      1.00      1.00       240\n\n             accuracy                           0.95       851\n            macro avg       0.95      0.95      0.95       851\n         weighted avg       0.95      0.95      0.95       851\n"
     }
   ],
-  "runtime_seconds": 61.90442395210266
+  "runtime_seconds": 61.53230166435242
 }

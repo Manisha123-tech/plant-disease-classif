@@ -1,0 +1,39 @@
+{
+    "classes": [
+        "Tomato_healthy",
+        "Tomato_Early_blight",
+        "Tomato_Late_blight",
+        "Potato___healthy",
+        "Potato___Early_blight"
+    ],
+    "splits": {
+        "train": {
+            "Tomato_healthy": 1113,
+            "Tomato_Early_blight": 700,
+            "Tomato_Late_blight": 1336,
+            "Potato___healthy": 106,
+            "Potato___Early_blight": 700,
+            "TOTAL": 3955
+        },
+        "val": {
+            "Tomato_healthy": 238,
+            "Tomato_Early_blight": 150,
+            "Tomato_Late_blight": 286,
+            "Potato___healthy": 22,
+            "Potato___Early_blight": 150,
+            "TOTAL": 846
+        },
+        "test": {
+            "Tomato_healthy": 240,
+            "Tomato_Early_blight": 150,
+            "Tomato_Late_blight": 287,
+            "Potato___healthy": 24,
+            "Potato___Early_blight": 150,
+            "TOTAL": 851
+        }
+    },
+    "total_images": 5652,
+    "image_dimensions_sample": {
+        "256x256": 1000
+    }
+}

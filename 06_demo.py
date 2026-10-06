@@ -1,18 +1,26 @@
-
+import streamlit as st
+import cv2
+import numpy as np
+import tensorflow as tf
 from pathlib import Path
 
-import numpy as np
-import streamlit as st
-from PIL import Image
-import tensorflow as tf
 
-from model_components import CBAM, FocalLoss
+# =========================================================
+# PATHS
+# =========================================================
 
 ROOT = Path(__file__).resolve().parent
 OUTPUT_DIR = ROOT / "outputs"
-MODEL_PATH = OUTPUT_DIR / "improved_model.keras"
 
-CLASS_NAMES = [
+MODEL_PATH = OUTPUT_DIR / "supervised_learning_model.keras"
+SCALER_PATH = OUTPUT_DIR / "supervised_learning_scaler.npz"
+
+
+# =========================================================
+# CLASS NAMES
+# =========================================================
+
+CLASSES = [
     "Tomato_healthy",
     "Tomato_Early_blight",
     "Tomato_Late_blight",
@@ -20,91 +28,259 @@ CLASS_NAMES = [
     "Potato___Early_blight",
 ]
 
-st.set_page_config(
-    page_title="Plant Disease Classifier",
-    page_icon="🌱",
-    layout="centered",
-)
 
-st.title("🌱 Plant Disease Classifier")
-st.write(
-    "Upload a tomato or potato leaf image. "
-    "The model predicts the leaf's disease class."
-)
-
+# =========================================================
+# LOAD MODEL
+# =========================================================
 
 @st.cache_resource
 def load_model():
-    if not MODEL_PATH.exists():
-        raise FileNotFoundError(
-            "Improved model not found. "
-            "Run 04_improved_model.py first."
-        )
 
     return tf.keras.models.load_model(
-        MODEL_PATH,
-        custom_objects={
-            "CBAM": CBAM,
-            "FocalLoss": FocalLoss,
-        },
-        compile=False,
+        MODEL_PATH
     )
 
 
-uploaded = st.file_uploader(
-    "Upload a leaf image",
-    type=["jpg", "jpeg", "png"],
+# =========================================================
+# LOAD SCALER
+# =========================================================
+
+@st.cache_resource
+def load_scaler():
+
+    scaler = np.load(SCALER_PATH)
+
+    mean = scaler["mean"]
+    std = scaler["std"]
+
+    std[std == 0] = 1
+
+    return mean, std
+
+
+model = load_model()
+scaler_mean, scaler_std = load_scaler()
+
+
+# =========================================================
+# FEATURE EXTRACTION
+# =========================================================
+
+def extract_features(image):
+
+    image = cv2.resize(
+        image,
+        (128, 128)
+    )
+
+    # OpenCV image is BGR
+    b, g, r = cv2.split(image)
+
+    mean_r = np.mean(r)
+    mean_g = np.mean(g)
+    mean_b = np.mean(b)
+
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    brightness = np.mean(gray)
+    texture = np.std(gray)
+
+    total = mean_r + mean_g + mean_b
+
+    if total > 0:
+        red_ratio = mean_r / total
+        green_ratio = mean_g / total
+        blue_ratio = mean_b / total
+    else:
+        red_ratio = 0
+        green_ratio = 0
+        blue_ratio = 0
+
+    features = np.array(
+        [
+            mean_r,
+            mean_g,
+            mean_b,
+            brightness,
+            texture,
+            red_ratio,
+            green_ratio,
+            blue_ratio
+        ],
+        dtype=np.float32
+    )
+
+    return features
+
+
+# =========================================================
+# STREAMLIT PAGE
+# =========================================================
+
+st.set_page_config(
+    page_title="Plant Disease Classifier",
+    page_icon="🌱",
+    layout="centered"
 )
 
-if uploaded is not None:
-    try:
-        image = Image.open(uploaded).convert("RGB")
-        st.image(
-            image,
-            caption="Uploaded leaf",
-            use_container_width=True,
+
+# =========================================================
+# TITLE
+# =========================================================
+
+st.title("🌱 Plant Disease Classification")
+
+st.write(
+    "Upload a plant leaf image to predict its disease class."
+)
+
+st.info(
+    "AI Approach: Supervised Learning using "
+    "a Feed-Forward Neural Network (MLP)"
+)
+
+
+# =========================================================
+# FILE UPLOAD
+# =========================================================
+
+uploaded_file = st.file_uploader(
+    "Upload a leaf image",
+    type=["jpg", "jpeg", "png"]
+)
+
+
+# =========================================================
+# PREDICTION
+# =========================================================
+
+if uploaded_file is not None:
+
+    file_bytes = np.asarray(
+        bytearray(uploaded_file.read()),
+        dtype=np.uint8
+    )
+
+    image = cv2.imdecode(
+        file_bytes,
+        cv2.IMREAD_COLOR
+    )
+
+    if image is None:
+
+        st.error(
+            "Could not read the uploaded image."
         )
 
-        if st.button("Predict disease", type="primary"):
-            with st.spinner("Analyzing the leaf..."):
-                model = load_model()
+    else:
 
-                img = image.resize((224, 224))
-                arr = np.asarray(img, dtype=np.float32)
-                arr = np.expand_dims(arr, axis=0)
+        # -------------------------------------------------
+        # DISPLAY IMAGE
+        # -------------------------------------------------
 
-                # The model already preprocesses its input.
-                # Pass raw RGB pixel values (0–255).
-                probs = model.predict(arr, verbose=0)[0]
+        display_image = cv2.cvtColor(
+            image,
+            cv2.COLOR_BGR2RGB
+        )
 
-                top_indices = np.argsort(probs)[::-1][:3]
+        st.image(
+            display_image,
+            caption="Uploaded Leaf Image",
+            use_container_width=True
+        )
 
-            best = int(top_indices[0])
-            predicted_class = CLASS_NAMES[best].replace(
-                "___", " — "
-            ).replace("_", " ")
 
-            st.success(f"Prediction: **{predicted_class}**")
-            st.metric(
-                "Model confidence",
-                f"{probs[best] * 100:.2f}%",
+        # -------------------------------------------------
+        # EXTRACT FEATURES
+        # -------------------------------------------------
+
+        features = extract_features(image)
+
+
+        # -------------------------------------------------
+        # STANDARDIZE FEATURES
+        # -------------------------------------------------
+
+        features = (
+            features - scaler_mean
+        ) / scaler_std
+
+
+        # -------------------------------------------------
+        # MODEL PREDICTION
+        # -------------------------------------------------
+
+        probabilities = model.predict(
+            features.reshape(1, -1),
+            verbose=0
+        )[0]
+
+
+        prediction_index = int(
+            np.argmax(probabilities)
+        )
+
+        prediction = CLASSES[
+            prediction_index
+        ]
+
+        confidence = (
+            probabilities[prediction_index]
+            * 100
+        )
+
+
+        # -------------------------------------------------
+        # DISPLAY RESULT
+        # -------------------------------------------------
+
+        st.subheader("Prediction")
+
+        st.success(
+            f"🌿 {prediction}"
+        )
+
+        st.metric(
+            "Prediction Confidence",
+            f"{confidence:.2f}%"
+        )
+
+
+        # -------------------------------------------------
+        # CLASS PROBABILITIES
+        # -------------------------------------------------
+
+        st.subheader(
+            "Class Probabilities"
+        )
+
+        for class_name, probability in zip(
+            CLASSES,
+            probabilities
+        ):
+
+            percentage = probability * 100
+
+            st.write(
+                f"**{class_name}**: "
+                f"{percentage:.2f}%"
             )
 
-            st.subheader("Top 3 predictions")
-
-            for idx in top_indices:
-                label = CLASS_NAMES[int(idx)].replace(
-                    "___", " — "
-                ).replace("_", " ")
-
-                st.write(
-                    f"**{label}** — {probs[idx] * 100:.2f}%"
-                )
-
-            st.caption(
-                "Predictions are model estimates and may "
-                "not always be correct."
+            st.progress(
+                float(probability)
             )
 
-    except Exception as error:
-        st.error(f"Could not process this image: {error}")
+
+# =========================================================
+# FOOTER
+# =========================================================
+
+st.divider()
+
+st.caption(
+    "Plant Disease Classification | "
+    "Semester 5 AI Project"
+)

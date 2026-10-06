@@ -1,0 +1,10 @@
+{
+    "approach": "Knowledge-Based Reasoning",
+    "accuracy": 0.3772032902467685,
+    "correct": 321,
+    "total": 851,
+    "rules": [
+        "Compare image features with class knowledge",
+        "Select class with minimum feature difference"
+    ]
+}
